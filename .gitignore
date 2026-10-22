@@ -1,0 +1,9 @@
+branch
+branchless
+branch_esperto
+branch250
+*.o
+/branch.s
+/branch_sem_barreira.s
+.DS_Store
+Thumbs.db
