@@ -27,18 +27,28 @@
 	cmpl	%esi, %r12d
 
 === esperto_O2.s
-	.p2align 3
-.L15:
-	movslq	(%rax), %rdx
-	movq	%rdx, %rcx
-	addq	%rbx, %rdx
-	cmpl	$127, %ecx
-	cmovg	%rdx, %rbx
+.L12:
+	movd	(%rax), %xmm7
 	addq	$4, %rax
+	pshufd	$0, %xmm7, %xmm0
+	movdqa	%xmm0, %xmm1
+	movdqa	%xmm0, %xmm3
+	movdqa	%xmm0, %xmm2
+	pcmpgtd	%xmm8, %xmm1
+	psrad	$31, %xmm3
+	punpckldq	%xmm3, %xmm2
+	punpckhdq	%xmm3, %xmm0
+	movdqa	%xmm1, %xmm4
+	movdqa	%xmm1, %xmm7
+	psrad	$31, %xmm4
+	punpckldq	%xmm4, %xmm7
+	punpckhdq	%xmm4, %xmm1
+	pand	%xmm7, %xmm2
+	pand	%xmm1, %xmm0
+	paddq	%xmm2, %xmm5
+	paddq	%xmm0, %xmm6
 	cmpq	%r15, %rax
-	jne	.L15
-	addl	$1, %esi
-	cmpl	%esi, %r12d
+	jne	.L12
 
 === branchless.s
 .L9:

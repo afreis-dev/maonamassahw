@@ -1,0 +1,1 @@
+Ripes nao terminou em 15000 ms: RV32_5S_NO_FW_HZ com laco_ordenado.s

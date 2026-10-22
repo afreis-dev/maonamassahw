@@ -1,0 +1,64 @@
+===== cycles
+88
+===== instructions retired
+52
+===== cycles per instruction (CPI)
+1.6923076923076923
+===== instructions per cycle (IPC)
+0.5909090909090909
+===== pipeline state
+	0	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	31	32	33	34	35	36	37	38	39	40	41	42	43	44	45	46	47	48	49	50	51	52	53	54	55	56	57	58	59	60	61	62	63	64	65	66	67	68	69	70	71	72	73	74	75	76	77	78	79	80	81	82	83	84	85	86	87	88	
+auipc x10 0x10000	IF	ID	EX	MEM	WB																																																																																					
+addi x10 x10 0		IF	ID	EX	MEM	WB																																																																																				
+addi x11 x0 8			IF	ID	EX	MEM	WB																																																																																			
+addi x12 x0 0				IF	ID	EX	MEM	WB																																																																																		
+addi x13 x0 0					IF	ID	EX	MEM	WB																																																																																	
+addi x14 x0 128						IF	ID	EX	MEM	WB																																																																																
+lw x5 0 x10							IF	ID	EX	MEM	WB						IF	ID	EX	MEM	WB						IF	ID	EX	MEM	WB						IF	ID	EX	MEM	WB						IF	ID	EX	MEM	WB					IF	ID	EX	MEM	WB					IF	ID	EX	MEM	WB					IF	ID	EX	MEM	WB												
+blt x5 x14 8 <pula>								IF	ID	-	EX	MEM	WB					IF	ID	-	EX	MEM	WB					IF	ID	-	EX	MEM	WB					IF	ID	-	EX	MEM	WB					IF	ID	-	EX	MEM	WB				IF	ID	-	EX	MEM	WB				IF	ID	-	EX	MEM	WB				IF	ID	-	EX	MEM	WB										
+add x13 x13 x5									IF	-	ID								IF	-	ID								IF	-	ID								IF	-	ID								IF	-	ID	EX	MEM	WB				IF	-	ID	EX	MEM	WB				IF	-	ID	EX	MEM	WB				IF	-	ID	EX	MEM	WB									
+addi x10 x10 4											IF	-	ID	EX	MEM	WB					IF	-	ID	EX	MEM	WB					IF	-	ID	EX	MEM	WB					IF	-	ID	EX	MEM	WB					IF	ID	EX	MEM	WB					IF	ID	EX	MEM	WB					IF	ID	EX	MEM	WB					IF	ID	EX	MEM	WB								
+addi x12 x12 1													IF	ID	EX	MEM	WB						IF	ID	EX	MEM	WB						IF	ID	EX	MEM	WB						IF	ID	EX	MEM	WB					IF	ID	EX	MEM	WB					IF	ID	EX	MEM	WB					IF	ID	EX	MEM	WB					IF	ID	EX	MEM	WB							
+blt x12 x11 -20 <laco>														IF	ID	EX	MEM	WB						IF	ID	EX	MEM	WB						IF	ID	EX	MEM	WB						IF	ID	EX	MEM	WB					IF	ID	EX	MEM	WB					IF	ID	EX	MEM	WB					IF	ID	EX	MEM	WB					IF	ID	EX	MEM	WB						
+addi x17 x0 10															IF	ID									IF	ID									IF	ID									IF	ID								IF	ID								IF	ID								IF	ID								IF	ID	EX	MEM	WB					
+ecall																IF										IF										IF										IF									IF									IF									IF									IF	ID	EX	-	-	MEM	WB		
+
+===== register values
+x0:	0	(0x00000000)
+x1:	0	(0x00000000)
+x2:	0	(0x00000000)
+x3:	0	(0x00000000)
+x4:	0	(0x00000000)
+x5:	255	(0x000000ff)
+x6:	0	(0x00000000)
+x7:	0	(0x00000000)
+x8:	0	(0x00000000)
+x9:	0	(0x00000000)
+x10:	268435488	(0x10000020)
+x11:	8	(0x00000008)
+x12:	8	(0x00000008)
+x13:	733	(0x000002dd)
+x14:	128	(0x00000080)
+x15:	0	(0x00000000)
+x16:	0	(0x00000000)
+x17:	10	(0x0000000a)
+x18:	0	(0x00000000)
+x19:	0	(0x00000000)
+x20:	0	(0x00000000)
+x21:	0	(0x00000000)
+x22:	0	(0x00000000)
+x23:	0	(0x00000000)
+x24:	0	(0x00000000)
+x25:	0	(0x00000000)
+x26:	0	(0x00000000)
+x27:	0	(0x00000000)
+x28:	0	(0x00000000)
+x29:	0	(0x00000000)
+x30:	0	(0x00000000)
+x31:	0	(0x00000000)
+
+===== simulation information (processor configuration, input file, ...)
+ISA extensions: 
+processor: RV32_5S
+source file: D:\Repositorios\CESAR\maonamassahw\ripes\laco_ordenado.s
+

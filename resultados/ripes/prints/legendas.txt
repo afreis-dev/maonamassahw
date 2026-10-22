@@ -1,0 +1,9 @@
+﻿(a) Pipeline enchendo - RV32 5-stage, laco.s
+Os 5 estagios ficam ocupados pela primeira vez no ciclo 4. Antes disso o pipeline esta enchendo.
+
+(b) Bolha por load-use - lw x5 seguido de blt x5
+O blt precisa de x5, que o lw so entrega depois de MEM. No ciclo 9 o blt fica parado em ID (e o add em IF): entra uma bolha (nop) em EX e o blt so executa um ciclo depois, ja com x5 via forwarding.
+
+(c) Flush no desvio tomado - blt x12, x11, laco
+O blt e decidido em EX (ciclo 14). As 2 instrucoes que ja tinham entrado no pipeline atras dele (addi x17 x0 10; ecall) sao descartadas (cinza com borda vermelha) e nunca chegam a EX. O PC volta para laco.
+

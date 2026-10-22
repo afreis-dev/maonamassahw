@@ -2,8 +2,18 @@
 set -eu
 . "$(dirname "$0")/comum.sh"
 
-for f in com_barreira esperto esperto_O2 branchless; do
-    echo "=== $f.s"
-    awk '{ l[NR] = $0 } /cmpl[ \t]+\$12[78]/ && !achou { achou = NR } END { for (i = achou - 5; i <= achou + 6; i++) print l[i] }' "$SAIDA/asm/$f.s"
+trecho() {
+    local arquivo=$1 padrao=$2 antes=$3 depois=$4
+    echo "=== $arquivo"
+    awk -v antes="$antes" -v depois="$depois" -v padrao="$padrao" '
+        { l[NR] = $0 }
+        $0 ~ padrao && !achou { achou = NR }
+        END { for (i = achou - antes; i <= achou + depois; i++) print l[i] }
+    ' "$SAIDA/asm/$arquivo"
     echo
-done
+}
+
+trecho com_barreira.s 'cmpl[ \t]+[$]127' 5 6
+trecho esperto.s 'cmpl[ \t]+[$]128' 5 6
+trecho esperto_O2.s 'pcmpgtd' 7 14
+trecho branchless.s 'cmpl[ \t]+[$]127' 5 6
