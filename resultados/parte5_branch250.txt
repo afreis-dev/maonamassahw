@@ -1,0 +1,23 @@
+### execucao unica de cada modo
+modo=aleatorio limiar=250 repeticoes=10000 soma=2015690000 tempo=0.154 s
+modo=ordenado  limiar=250 repeticoes=10000 soma=2015690000 tempo=0.085 s
+
+### medir.sh
+== /tmp/maonamassa/branch250 aleatorio (5 execuções) ==
+   modo=aleatorio limiar=250 repeticoes=10000 soma=2015690000 tempo=0.155 s
+   modo=aleatorio limiar=250 repeticoes=10000 soma=2015690000 tempo=0.156 s
+   modo=aleatorio limiar=250 repeticoes=10000 soma=2015690000 tempo=0.155 s
+   modo=aleatorio limiar=250 repeticoes=10000 soma=2015690000 tempo=0.153 s
+   modo=aleatorio limiar=250 repeticoes=10000 soma=2015690000 tempo=0.156 s
+   mediana: 0.155 s
+
+== /tmp/maonamassa/branch250 sort (5 execuções) ==
+   modo=ordenado  limiar=250 repeticoes=10000 soma=2015690000 tempo=0.086 s
+   modo=ordenado  limiar=250 repeticoes=10000 soma=2015690000 tempo=0.086 s
+   modo=ordenado  limiar=250 repeticoes=10000 soma=2015690000 tempo=0.086 s
+   modo=ordenado  limiar=250 repeticoes=10000 soma=2015690000 tempo=0.093 s
+   modo=ordenado  limiar=250 repeticoes=10000 soma=2015690000 tempo=0.085 s
+   mediana: 0.086 s
+
+perf não encontrado (ele só existe no Linux).
+Alternativa: valgrind --tool=cachegrind --cache-sim=no --branch-sim=yes /tmp/maonamassa/branch250 aleatorio 20

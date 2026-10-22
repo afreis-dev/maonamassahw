@@ -8,17 +8,29 @@ VG=${VALGRIND:-valgrind}
 
 echo "## $ROTULO ($PROG)"
 
+CONTADOR=""
+NOME_CONTADOR=""
 if command -v perf >/dev/null 2>&1; then
+    CONTADOR="perf stat -e branches,branch-misses"
+    NOME_CONTADOR="perf stat"
+elif [ -x "$BIN/contadores" ]; then
+    CONTADOR="$BIN/contadores"
+    NOME_CONTADOR="contadores (perf_event_open)"
+fi
+
+if [ -n "$CONTADOR" ]; then
     for modo in aleatorio sort; do
-        echo "-- perf stat: $modo $REP"
-        perf stat -e branches,branch-misses "$PROG" "$modo" "$REP" 2>&1 | grep -E 'modo=|branches|branch-misses|elapsed' || true
+        for i in 1 2 3 4 5; do
+            echo "-- $NOME_CONTADOR: $modo $REP (execucao $i)"
+            $CONTADOR "$PROG" "$modo" "$REP" 2>&1 | grep -E 'modo=|branches|branch-misses|elapsed' || true
+        done
     done
 else
-    echo "-- perf: nao instalado"
+    echo "-- contadores de hardware: indisponiveis"
 fi
 
 if command -v "$VG" >/dev/null 2>&1; then
-    for reps in "$REP_VG" $((REP_VG * 5)); do
+    for reps in $REPS_VG; do
         for modo in aleatorio sort; do
             echo "-- valgrind cachegrind: $modo $reps"
             "$VG" --tool=cachegrind --cache-sim=no --branch-sim=yes --cachegrind-out-file=/dev/null "$PROG" "$modo" "$reps" 2>&1 | grep -E 'modo=|Branches|Mispredicts|Mispred rate' || true

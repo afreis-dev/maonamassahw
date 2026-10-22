@@ -1,0 +1,51 @@
+ferramenta: cperf (Laboratorio medindo a CPU), compilado com gcc -O2 -fno-unroll-loops
+data: 2026-10-22 15:53:49 -0300
+### cperf freq - execucao 1
+== FREQUENCIA REAL DO NUCLEO ==
+  metodo: cadeia de somas dependentes (1 soma = 1 ciclo)
+
+  amostra 1            :  4.013 GHz
+  amostra 2            :  4.020 GHz
+  amostra 3            :  3.991 GHz
+  --------------------------------------------------------------------
+  FREQUENCIA EFETIVA   :  4.008 GHz
+  Taxa do TSC          :  2.904 GHz (relogio de referencia fixo)
+  Razao nucleo / TSC   :  1.380  (>1 indica turbo)
+
+### cperf freq - execucao 2
+== FREQUENCIA REAL DO NUCLEO ==
+  metodo: cadeia de somas dependentes (1 soma = 1 ciclo)
+
+  amostra 1            :  4.018 GHz
+  amostra 2            :  3.998 GHz
+  amostra 3            :  4.010 GHz
+  --------------------------------------------------------------------
+  FREQUENCIA EFETIVA   :  4.009 GHz
+  Taxa do TSC          :  2.904 GHz (relogio de referencia fixo)
+  Razao nucleo / TSC   :  1.380  (>1 indica turbo)
+
+### cperf freq - execucao 3
+== FREQUENCIA REAL DO NUCLEO ==
+  metodo: cadeia de somas dependentes (1 soma = 1 ciclo)
+
+  amostra 1            :  4.020 GHz
+  amostra 2            :  3.999 GHz
+  amostra 3            :  4.008 GHz
+  --------------------------------------------------------------------
+  FREQUENCIA EFETIVA   :  4.009 GHz
+  Taxa do TSC          :  2.904 GHz (relogio de referencia fixo)
+  Razao nucleo / TSC   :  1.380  (>1 indica turbo)
+
+### cperf calib
+== CALIBRACAO: o instrumento e confiavel? ==
+  Assumimos que 'add reg,reg' dependente custa 1 ciclo e obtivemos
+  3.984 GHz. Agora medimos instrucoes de latencia CONHECIDA.
+  Se os valores baterem, a premissa se sustenta.
+
+  instrucao         | medido |  esperado | veredito
+  --------------------------------------------------------------------
+  imul  (int64)     |   2.99 |         3 | OK
+  divsd (float64)   |  12.92 |     13-20 | OK
+  --------------------------------------------------------------------
+  VEREDITO: medicao valida. Use 3.984 GHz como referencia.
+

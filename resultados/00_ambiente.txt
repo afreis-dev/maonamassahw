@@ -1,0 +1,20 @@
+data: 2026-10-22 15:59:52 -0300
+kernel: Linux 6.18.33.2-microsoft-standard-WSL2 x86_64 GNU/Linux
+so: Ubuntu 26.04 LTS
+gcc: gcc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
+make: GNU Make 4.4.1
+perf: nao instalado (contadores lidos com scripts/contadores.c, via perf_event_open)
+valgrind: valgrind-3.26.0
+repeticoes: 10000
+
+Architecture:                            x86_64
+CPU(s):                                  12
+Vendor ID:                               GenuineIntel
+Model name:                              Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz
+Thread(s) per core:                      2
+Core(s) per socket:                      6
+Socket(s):                               1
+Hypervisor vendor:                       Microsoft
+L1d cache:                               192 KiB (6 instances)
+L2 cache:                                1.5 MiB (6 instances)
+L3 cache:                                12 MiB (1 instance)

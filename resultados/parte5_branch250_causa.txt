@@ -1,0 +1,81 @@
+## branch250 (/tmp/maonamassa/branch250)
+-- contadores (perf_event_open): aleatorio 10000 (execucao 1)
+modo=aleatorio limiar=250 repeticoes=10000 soma=2015690000 tempo=0.156 s
+       663909432      branches
+         8708513      branch-misses     #    1.31% of all branches
+        0.156922 seconds time elapsed
+-- contadores (perf_event_open): aleatorio 10000 (execucao 2)
+modo=aleatorio limiar=250 repeticoes=10000 soma=2015690000 tempo=0.157 s
+       663909431      branches
+         8669984      branch-misses     #    1.31% of all branches
+        0.157537 seconds time elapsed
+-- contadores (perf_event_open): aleatorio 10000 (execucao 3)
+modo=aleatorio limiar=250 repeticoes=10000 soma=2015690000 tempo=0.155 s
+       663909425      branches
+         8799721      branch-misses     #    1.33% of all branches
+        0.156283 seconds time elapsed
+-- contadores (perf_event_open): aleatorio 10000 (execucao 4)
+modo=aleatorio limiar=250 repeticoes=10000 soma=2015690000 tempo=0.153 s
+       663909431      branches
+         8768560      branch-misses     #    1.32% of all branches
+        0.153713 seconds time elapsed
+-- contadores (perf_event_open): aleatorio 10000 (execucao 5)
+modo=aleatorio limiar=250 repeticoes=10000 soma=2015690000 tempo=0.153 s
+       663909430      branches
+         8784257      branch-misses     #    1.32% of all branches
+        0.153894 seconds time elapsed
+-- contadores (perf_event_open): sort 10000 (execucao 1)
+modo=ordenado  limiar=250 repeticoes=10000 soma=2015690000 tempo=0.088 s
+       666602912      branches
+          196507      branch-misses     #    0.03% of all branches
+        0.091472 seconds time elapsed
+-- contadores (perf_event_open): sort 10000 (execucao 2)
+modo=ordenado  limiar=250 repeticoes=10000 soma=2015690000 tempo=0.086 s
+       666602919      branches
+          195599      branch-misses     #    0.03% of all branches
+        0.088924 seconds time elapsed
+-- contadores (perf_event_open): sort 10000 (execucao 3)
+modo=ordenado  limiar=250 repeticoes=10000 soma=2015690000 tempo=0.085 s
+       666602913      branches
+          196158      branch-misses     #    0.03% of all branches
+        0.088286 seconds time elapsed
+-- contadores (perf_event_open): sort 10000 (execucao 4)
+modo=ordenado  limiar=250 repeticoes=10000 soma=2015690000 tempo=0.088 s
+       666602912      branches
+          195573      branch-misses     #    0.03% of all branches
+        0.091442 seconds time elapsed
+-- contadores (perf_event_open): sort 10000 (execucao 5)
+modo=ordenado  limiar=250 repeticoes=10000 soma=2015690000 tempo=0.089 s
+       666602914      branches
+          196520      branch-misses     #    0.03% of all branches
+        0.092297 seconds time elapsed
+-- valgrind cachegrind: aleatorio 20
+modo=aleatorio limiar=250 repeticoes=20 soma=4031380 tempo=0.009 s
+==691== Branches:      1,627,655  (1,594,480 cond + 33,175 ind)
+==691== Mispredicts:      21,747  (   21,518 cond +    229 ind)
+==691== Mispred rate:        1.3% (      1.3%     +    0.7%   )
+-- valgrind cachegrind: sort 20
+modo=ordenado  limiar=250 repeticoes=20 soma=4031380 tempo=0.009 s
+==693== Branches:       3,830,248  (3,298,458 cond + 531,790 ind)
+==693== Mispredicts:      211,672  (  211,439 cond +     233 ind)
+==693== Mispred rate:         5.5% (      6.4%     +     0.0%   )
+-- valgrind cachegrind: aleatorio 100
+modo=aleatorio limiar=250 repeticoes=100 soma=20156900 tempo=0.055 s
+==695== Branches:       6,870,621  (6,837,446 cond + 33,175 ind)
+==695== Mispredicts:       86,789  (   86,560 cond +    229 ind)
+==695== Mispred rate:         1.3% (      1.3%     +    0.7%   )
+-- valgrind cachegrind: sort 100
+modo=ordenado  limiar=250 repeticoes=100 soma=20156900 tempo=0.044 s
+==697== Branches:       9,073,206  (8,541,416 cond + 531,790 ind)
+==697== Mispredicts:      211,835  (  211,602 cond +     233 ind)
+==697== Mispred rate:         2.3% (      2.5%     +     0.0%   )
+-- valgrind cachegrind: aleatorio 500
+modo=aleatorio limiar=250 repeticoes=500 soma=100784500 tempo=0.224 s
+==699== Branches:       33,085,410  (33,052,235 cond + 33,175 ind)
+==699== Mispredicts:       411,987  (   411,758 cond +    229 ind)
+==699== Mispred rate:          1.2% (       1.2%     +    0.7%   )
+-- valgrind cachegrind: sort 500
+modo=ordenado  limiar=250 repeticoes=500 soma=100784500 tempo=0.223 s
+==701== Branches:       35,288,009  (34,756,219 cond + 531,790 ind)
+==701== Mispredicts:       212,629  (   212,396 cond +     233 ind)
+==701== Mispred rate:          0.6% (       0.6%     +     0.0%   )

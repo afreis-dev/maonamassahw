@@ -1,0 +1,56 @@
+=== com_barreira.s
+	addq	$4, %rax
+	cmpq	%rbx, %rax
+	je	.L26
+.L11:
+	movl	(%rax), %edx
+	cmpl	$127, %edx
+	jle	.L10
+	movslq	%edx, %rdx
+	addq	%rdx, %rbp
+	jmp	.L10
+.L26:
+	addl	$1, %ecx
+
+=== esperto.s
+	.p2align 5
+.L11:
+	movl	(%rax), %ecx
+	movslq	%ecx, %rdx
+	addq	%rbx, %rdx
+	cmpl	$128, %ecx
+	cmovge	%rdx, %rbx
+	addq	$4, %rax
+	cmpq	%rbp, %rax
+	jne	.L11
+	addl	$1, %esi
+	cmpl	%esi, %r12d
+
+=== esperto_O2.s
+	.p2align 3
+.L15:
+	movslq	(%rax), %rdx
+	movq	%rdx, %rcx
+	addq	%rbx, %rdx
+	cmpl	$127, %ecx
+	cmovg	%rdx, %rbx
+	addq	$4, %rax
+	cmpq	%r15, %rax
+	jne	.L15
+	addl	$1, %esi
+	cmpl	%esi, %r12d
+
+=== branchless.s
+.L9:
+	movq	%r13, %rdx
+	.p2align 5
+.L10:
+	movl	(%rdx), %eax
+	cmpl	$127, %eax
+	cmovle	%ecx, %eax
+	cltq
+	addq	%rax, %rbx
+	addq	$4, %rdx
+	cmpq	%rbp, %rdx
+	jne	.L10
+

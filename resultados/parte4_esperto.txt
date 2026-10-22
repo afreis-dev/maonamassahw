@@ -1,0 +1,38 @@
+### branch_esperto (-O1 -DSEM_BARREIRA)
+== /tmp/maonamassa/branch_esperto aleatorio (5 execuções) ==
+   modo=aleatorio limiar=128 repeticoes=10000 soma=31493160000 tempo=0.188 s
+   modo=aleatorio limiar=128 repeticoes=10000 soma=31493160000 tempo=0.188 s
+   modo=aleatorio limiar=128 repeticoes=10000 soma=31493160000 tempo=0.190 s
+   modo=aleatorio limiar=128 repeticoes=10000 soma=31493160000 tempo=0.194 s
+   modo=aleatorio limiar=128 repeticoes=10000 soma=31493160000 tempo=0.207 s
+   mediana: 0.190 s
+
+== /tmp/maonamassa/branch_esperto sort (5 execuções) ==
+   modo=ordenado  limiar=128 repeticoes=10000 soma=31493160000 tempo=0.205 s
+   modo=ordenado  limiar=128 repeticoes=10000 soma=31493160000 tempo=0.196 s
+   modo=ordenado  limiar=128 repeticoes=10000 soma=31493160000 tempo=0.203 s
+   modo=ordenado  limiar=128 repeticoes=10000 soma=31493160000 tempo=0.199 s
+   modo=ordenado  limiar=128 repeticoes=10000 soma=31493160000 tempo=0.196 s
+   mediana: 0.199 s
+
+perf não encontrado (ele só existe no Linux).
+Alternativa: valgrind --tool=cachegrind --cache-sim=no --branch-sim=yes /tmp/maonamassa/branch_esperto aleatorio 20
+### branch_esperto_O2 (-O2 -DSEM_BARREIRA)
+== /tmp/maonamassa/branch_esperto_O2 aleatorio (5 execuções) ==
+   modo=aleatorio limiar=128 repeticoes=10000 soma=31493160000 tempo=0.111 s
+   modo=aleatorio limiar=128 repeticoes=10000 soma=31493160000 tempo=0.106 s
+   modo=aleatorio limiar=128 repeticoes=10000 soma=31493160000 tempo=0.106 s
+   modo=aleatorio limiar=128 repeticoes=10000 soma=31493160000 tempo=0.113 s
+   modo=aleatorio limiar=128 repeticoes=10000 soma=31493160000 tempo=0.110 s
+   mediana: 0.110 s
+
+== /tmp/maonamassa/branch_esperto_O2 sort (5 execuções) ==
+   modo=ordenado  limiar=128 repeticoes=10000 soma=31493160000 tempo=0.106 s
+   modo=ordenado  limiar=128 repeticoes=10000 soma=31493160000 tempo=0.107 s
+   modo=ordenado  limiar=128 repeticoes=10000 soma=31493160000 tempo=0.104 s
+   modo=ordenado  limiar=128 repeticoes=10000 soma=31493160000 tempo=0.105 s
+   modo=ordenado  limiar=128 repeticoes=10000 soma=31493160000 tempo=0.114 s
+   mediana: 0.106 s
+
+perf não encontrado (ele só existe no Linux).
+Alternativa: valgrind --tool=cachegrind --cache-sim=no --branch-sim=yes /tmp/maonamassa/branch_esperto_O2 aleatorio 20

@@ -11,7 +11,7 @@ set -u
     if command -v perf >/dev/null 2>&1; then
         echo "perf: $(perf --version 2>&1 | head -1)"
     else
-        echo "perf: nao instalado"
+        echo "perf: nao instalado (contadores lidos com scripts/contadores.c, via perf_event_open)"
     fi
     if command -v valgrind >/dev/null 2>&1; then
         echo "valgrind: $(valgrind --version)"
