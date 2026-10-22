@@ -8,7 +8,10 @@ trecho() {
     awk -v antes="$antes" -v depois="$depois" -v padrao="$padrao" '
         { l[NR] = $0 }
         $0 ~ padrao && !achou { achou = NR }
-        END { for (i = achou - antes; i <= achou + depois; i++) print l[i] }
+        END {
+            if (!achou) { print "padrao nao encontrado: " padrao; exit 1 }
+            for (i = achou - antes; i <= achou + depois; i++) print l[i]
+        }
     ' "$SAIDA/asm/$arquivo"
     echo
 }

@@ -10,7 +10,7 @@ echo "## $ROTULO ($PROG)"
 
 CONTADOR=""
 NOME_CONTADOR=""
-if command -v perf >/dev/null 2>&1; then
+if perf_funciona; then
     CONTADOR="perf stat -e branches,branch-misses"
     NOME_CONTADOR="perf stat"
 elif [ -x "$BIN/contadores" ]; then

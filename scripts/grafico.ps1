@@ -1,9 +1,10 @@
-Add-Type -AssemblyName System.Drawing
+﻿Add-Type -AssemblyName System.Drawing
 
 $raiz = Split-Path $PSScriptRoot -Parent
 $entrada = Join-Path $raiz "resultados\parte5_curva_limiar.csv"
 $saida = Join-Path $raiz "resultados\parte5_grafico_limiar.png"
 $inv = [Globalization.CultureInfo]::InvariantCulture
+$br = [Globalization.CultureInfo]::GetCultureInfo("pt-BR")
 
 $series = @{}
 foreach ($linha in (Import-Csv $entrada)) {
@@ -50,11 +51,11 @@ $centro.Alignment = [System.Drawing.StringAlignment]::Center
 $direita = New-Object System.Drawing.StringFormat
 $direita.Alignment = [System.Drawing.StringAlignment]::Far
 
-$g.DrawString("Tempo x LIMIAR (branch.c, -O1, 10000 repeticoes)", $fonteTitulo, $preto, [single]($largura / 2), 18, $centro)
+$g.DrawString("Tempo × LIMIAR (branch.c, -O1, 10.000 repetições)", $fonteTitulo, $preto, [single]($largura / 2), 18, $centro)
 
 for ($y = 0.0; $y -le $yMax + 0.0001; $y += 0.2) {
     $g.DrawLine($penGrade, (PX 0), (PY $y), (PX $xMax), (PY $y))
-    $g.DrawString($y.ToString("0.0", $inv), $fonteTick, $cinza, [single]($esq - 8), [single]((PY $y) - 9), $direita)
+    $g.DrawString($y.ToString("0.0", $br), $fonteTick, $cinza, [single]($esq - 8), [single]((PY $y) - 9), $direita)
 }
 
 $ticks = @(0, 32, 64, 96, 128, 160, 192, 224, 250, 256)
@@ -71,11 +72,11 @@ $g.DrawString("LIMIAR", $fonteEixo, $preto, [single]($esq + $areaL / 2), [single
 $estado = $g.Save()
 $g.TranslateTransform(22, [single]($topo + $areaA / 2))
 $g.RotateTransform(-90)
-$g.DrawString("Tempo (s) - mediana de 5 execucoes", $fonteEixo, $preto, 0, 0, $centro)
+$g.DrawString("Tempo (s) — mediana de 5 execuções", $fonteEixo, $preto, 0, 0, $centro)
 $g.Restore($estado)
 
 $estilos = @(
-    @{ Modo = "aleatorio"; Rotulo = "Array aleatorio"; Cor = [System.Drawing.Color]::FromArgb(31, 119, 180); Rotular = $true },
+    @{ Modo = "aleatorio"; Rotulo = "Array aleatório"; Cor = [System.Drawing.Color]::FromArgb(31, 119, 180); Rotular = $true },
     @{ Modo = "sort";      Rotulo = "Array ordenado";  Cor = [System.Drawing.Color]::FromArgb(230, 120, 20); Rotular = $false }
 )
 
@@ -92,7 +93,7 @@ foreach ($e in $estilos) {
         $g.FillEllipse($pincel, [single]((PX $p.X) - 5), [single]((PY $p.Y) - 5), 10, 10)
         if ($e.Rotular) {
             $deslocX = if ($p.X -eq 0) { 16 } else { 0 }
-            $g.DrawString($p.Y.ToString("0.00", $inv), $fontePonto, $preto, [single]((PX $p.X) + $deslocX), [single]((PY $p.Y) - 24), $centro)
+            $g.DrawString($p.Y.ToString("0.00", $br), $fontePonto, $preto, [single]((PX $p.X) + $deslocX), [single]((PY $p.Y) - 24), $centro)
         }
     }
     $g.DrawLine($pen, [single]$legendaX, [single]($legendaY + 9), [single]($legendaX + 30), [single]($legendaY + 9))

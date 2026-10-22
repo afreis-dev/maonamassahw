@@ -8,10 +8,10 @@ set -u
     echo "so: $(. /etc/os-release && echo "$PRETTY_NAME")"
     echo "gcc: $(gcc --version | head -1)"
     echo "make: $(make --version | head -1)"
-    if command -v perf >/dev/null 2>&1; then
+    if perf_funciona; then
         echo "perf: $(perf --version 2>&1 | head -1)"
     else
-        echo "perf: nao instalado (contadores lidos com scripts/contadores.c, via perf_event_open)"
+        echo "perf: indisponivel (contadores lidos com scripts/contadores.c, via perf_event_open)"
     fi
     if command -v valgrind >/dev/null 2>&1; then
         echo "valgrind: $(valgrind --version)"

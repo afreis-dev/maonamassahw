@@ -1,9 +1,14 @@
 branch
 branchless
+branchless250
 branch_esperto
+branch_esperto_O2
 branch250
+contadores
 *.o
 /branch.s
 /branch_sem_barreira.s
+__pycache__/
+*.pyc
 .DS_Store
 Thumbs.db

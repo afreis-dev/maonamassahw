@@ -1,4 +1,4 @@
-Add-Type -AssemblyName System.Drawing
+﻿Add-Type -AssemblyName System.Drawing
 
 $raiz = Split-Path $PSScriptRoot -Parent
 $pasta = Join-Path $raiz "resultados\ripes"
@@ -54,7 +54,7 @@ function Get-Execucao($instrucao, $cicloInicio) {
 $legendas = New-Object System.Collections.Generic.List[string]
 
 function New-Diagrama([string]$titulo, [int]$c0, [int]$c1, [string]$legenda, [string]$arquivo) {
-    $legendas.Add("$titulo`r`n$legenda`r`n")
+    $legendas.Add("$titulo`n$legenda`n")
     $visiveis = @($instrucoes | Where-Object {
         $linha = $_
         $achou = $false
@@ -110,7 +110,7 @@ function New-Diagrama([string]$titulo, [int]$c0, [int]$c1, [string]$legenda, [st
             $g.FillRectangle($pincel, $retangulo)
             $g.DrawRectangle($(if ($descartada) { $bordaFlush } else { $borda }), $retangulo)
             $texto = $(if ($t -eq "-") { "parada" } else { $t })
-            $g.DrawString($texto, $fCelula, $(if ($t -eq "-") { [System.Drawing.Brushes]::White } else { $preto }), [System.Drawing.RectangleF]::new($x, $y, $celulaL, $celulaA), $centro)
+            $g.DrawString($texto, $fCelula, $(if ($t -eq "-" -and -not $descartada) { [System.Drawing.Brushes]::White } else { $preto }), [System.Drawing.RectangleF]::new($x, $y, $celulaL, $celulaA), $centro)
         }
         $linhaIndice++
     }
@@ -128,7 +128,7 @@ for ($c = 0; $c -le $totalCiclos; $c++) {
     $ocupados = @("IF", "ID", "EX", "MEM", "WB" | Where-Object { $estagio = $_; @($instrucoes | Where-Object { $_.Tokens[$c] -eq $estagio }).Count -gt 0 })
     if ($ocupados.Count -eq 5) { $cicloPrimeiroPreenchido = $c; break }
 }
-New-Diagrama "(a) Pipeline enchendo - RV32 5-stage, laco.s" 0 9 "Os 5 estagios ficam ocupados pela primeira vez no ciclo $cicloPrimeiroPreenchido. Antes disso o pipeline esta enchendo." (Join-Path $destino "a_pipeline_enchendo.png")
+New-Diagrama "(a) Pipeline enchendo - RV32 5-stage, laco.s" 0 9 "Os 5 estágios ficam ocupados pela primeira vez no ciclo $cicloPrimeiroPreenchido. Antes disso o pipeline está enchendo." (Join-Path $destino "a_pipeline_enchendo.png")
 
 $lw = $instrucoes | Where-Object { $_.Rotulo -like "lw *" } | Select-Object -First 1
 $bltDado = $instrucoes | Where-Object { $_.Rotulo -like "blt x5 *" } | Select-Object -First 1
@@ -136,7 +136,7 @@ $lwExecucao = $lw.Execucoes[0]
 $bltExecucao = $bltDado.Execucoes[0]
 $cicloBolha = -1
 for ($c = $bltExecucao.Inicio; $c -le $bltExecucao.Fim; $c++) { if ($bltDado.Tokens[$c] -eq "-") { $cicloBolha = $c; break } }
-New-Diagrama "(b) Bolha por load-use - lw x5 seguido de blt x5" $lwExecucao.Inicio ($lwExecucao.Inicio + 9) "O blt precisa de x5, que o lw so entrega depois de MEM. No ciclo $cicloBolha o blt fica parado em ID (e o add em IF): entra uma bolha (nop) em EX e o blt so executa um ciclo depois, ja com x5 via forwarding." (Join-Path $destino "b_bolha_load_use.png")
+New-Diagrama "(b) Bolha por load-use - lw x5 seguido de blt x5" $lwExecucao.Inicio ($lwExecucao.Inicio + 9) "O blt precisa de x5, que o lw só entrega depois de MEM. No ciclo $cicloBolha o blt fica parado em ID (e o add em IF): entra uma bolha (nop) em EX e o blt só executa um ciclo depois, já com x5 via forwarding." (Join-Path $destino "b_bolha_load_use.png")
 
 $bltLaco = $instrucoes | Where-Object { $_.Rotulo -like "blt x12 *" } | Select-Object -First 1
 $bltTomado = $bltLaco.Execucoes[0]
@@ -148,5 +148,5 @@ foreach ($ins in $instrucoes) {
         if (-not $x.TemEX -and $x.Inicio -gt $bltTomado.Inicio -and $x.Inicio -le $cicloEX) { $listaDescartadas += $ins.Rotulo }
     }
 }
-New-Diagrama "(c) Flush no desvio tomado - blt x12, x11, laco" ($bltTomado.Inicio - 3) ($bltTomado.Inicio + 9) "O blt e decidido em EX (ciclo $cicloEX). As $($listaDescartadas.Count) instrucoes que ja tinham entrado no pipeline atras dele ($($listaDescartadas -join '; ')) sao descartadas (cinza com borda vermelha) e nunca chegam a EX. O PC volta para laco." (Join-Path $destino "c_flush_desvio.png")
-Set-Content -Path (Join-Path $destino "legendas.txt") -Value ($legendas -join "`r`n") -Encoding utf8
+New-Diagrama "(c) Flush no desvio tomado - blt x12, x11, laco" ($bltTomado.Inicio - 3) ($bltTomado.Inicio + 4) "O blt é decidido em EX (ciclo $cicloEX). As $($listaDescartadas.Count) instruções que já tinham entrado no pipeline atrás dele ($($listaDescartadas -join '; ')) são descartadas (cinza com borda vermelha) e nunca chegam a EX. O PC volta para laco." (Join-Path $destino "c_flush_desvio.png")
+[System.IO.File]::WriteAllText((Join-Path $destino "legendas.txt"), (($legendas -join "`n") + "`n"), (New-Object System.Text.UTF8Encoding($false)))
