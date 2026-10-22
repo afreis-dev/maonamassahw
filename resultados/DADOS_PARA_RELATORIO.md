@@ -11,7 +11,7 @@ Gerado por `scripts/resumo.py` a partir dos arquivos brutos em `resultados/`.
 | Sistema operacional | Ubuntu 26.04 LTS em WSL2 (kernel 6.18.33.2-microsoft-standard-WSL2), host Windows 11 |
 | Compilador e versão | gcc (Ubuntu 15.2.0-16ubuntu1) 15.2.0 |
 | Ferramenta de medição | contadores de hardware via perf_event_open (scripts/contadores.c, mesmos eventos do perf stat) e valgrind-3.26.0 (cachegrind --branch-sim) |
-| Nº de repetições | 10000 |
+| Nº de repetições | 10.000 |
 
 ## Partes 2 e 3 — Tabela 1 (branch, LIMIAR = 128)
 
@@ -40,6 +40,8 @@ Soma nos dois modos: 31.493.160.000 (idêntica).
 | frequência efetiva (cperf) | 4,009 GHz |
 | custo_por_erro (ciclos), frequência efetiva | 23,8 ciclos |
 | custo_por_erro (ciclos), frequência nominal 2,90 GHz | 17,2 ciclos |
+
+Observação: o `cperf calib` indica 3,984 GHz como referência (uma única medição); com esse valor o custo seria 23,7 ciclos. Usamos a mediana das 3 medições de `cperf freq` (4,009 GHz).
 
 Ciclos por iteração do laço: aleatório 13,38, ordenado 1,53 (a 4,0 GHz efetivos).
 
@@ -181,7 +183,7 @@ Razão aleatório / ordenado: LIMIAR 128 = 8,75 ×; LIMIAR 250 = 1,80 ×.
 
 ### 5.4 — curva do limiar (mediana de 5 execuções)
 
-| LIMIAR | aleatório (s) | ordenado (s) | P(if verdadeiro) |
+| LIMIAR | aleatório (s) | ordenado (s) | P(if verdadeiro) teórica |
 | --- | --- | --- | --- |
 | 0 | 0,169 | 0,167 | 100,0% |
 | 32 | 0,478 | 0,158 | 87,5% |
@@ -194,29 +196,48 @@ Razão aleatório / ordenado: LIMIAR 128 = 8,75 ×; LIMIAR 250 = 1,80 ×.
 | 250 | 0,186 | 0,098 | 2,3% |
 | 256 | 0,087 | 0,088 | 0,0% |
 
+A curva vem do `scripts/parte5.sh` (5 execuções por ponto, medidas à parte), por isso os pontos de LIMIAR 128 e 250 diferem um pouco das Tabelas 1 e 3, que vêm do `medir.sh`. A coluna de probabilidade é a teórica, (256 − LIMIAR) / 256, com valores uniformes de 0 a 255; no array sorteado a fração real de `v[i] >= LIMIAR` difere em até ~0,1 ponto percentual.
+
 Gráfico: `resultados/parte5_grafico_limiar.png`
 
 ## Parte 6 — Ripes
 
 Soma esperada (calculada à mão): 200 + 150 + 255 + 128 = **733**
 
+### Tabela do relatório
+
 | Processador | Cycles | Instrs. retired | CPI | x13 |
 | --- | --- | --- | --- | --- |
 | 5-stage processor | 88 | 52 | 1,692 | 733 (correto) |
 | 5-stage processor w/o forwarding unit | 114 | 52 | 2,192 | 733 (correto) |
-| 5-stage w/o forwarding or hazard detection (laco.s original) | — | — | — | NÃO TERMINA: o `li a7, 10` é seguido direto do `ecall`, que lê o a7 antigo; sem hazard detection a execução não acaba |
-| 5-stage w/o forwarding or hazard detection (laco_sem_hz.s: 4 nops antes do ecall) | 86 | 66 | 1,303 | 426576476 (ERRADO) |
-| 5-stage processor — dados ordenados | 88 | 52 | 1,692 | 733 (correto) |
-| extra: 5-stage w/o hazard detection (laco.s original) | — | — | — | NÃO TERMINA: o `li a7, 10` é seguido direto do `ecall`, que lê o a7 antigo; sem hazard detection a execução não acaba |
-| extra: 5-stage w/o hazard detection (laco_sem_hz.s) | 90 | 62 | 1,452 | 313 (ERRADO) |
-| extra: 5-stage w/o forwarding unit — dados ordenados | 114 | 52 | 2,192 | 733 (correto) |
-| extra: 5-stage w/o fw/hazard — dados ordenados (laco_sem_hz_ordenado.s) | 86 | 66 | 1,303 | 426576476 (ERRADO) |
+| 5-stage processor w/o forwarding or hazard detection (laco.s original) | — | — | — | não terminou (o Ripes ficou rodando além de 15 s) |
+| 5-stage processor w/o forwarding or hazard detection (laco_sem_hz.s, 4 nops antes do ecall) | 86 | 66 | 1,303 | 426.576.476 (ERRADO) |
+| 5-stage processor - dados ordenados | 88 | 52 | 1,692 | 733 (correto) |
 
 Forwarding economizou 26 ciclos (114 → 88), CPI 2,192 → 1,692.
 
 Dados ordenados no processador completo: 88 ciclos contra 88 com os dados originais. A ordem dos dados não muda nada: o número de desvios tomados é o mesmo (4 do `blt x5` + 7 do `blt x12`), então o Ripes usa previsão estática (sempre "não desvia"), sem histórico.
 
-Os processadores sem hazard detection executam o programa com valores velhos dos registradores (dependências RAW não resolvidas), por isso o x13 sai errado quando o programa chega a terminar. As linhas com `laco_sem_hz*.s` usam o mesmo laço, só com 4 `nop` antes do `ecall` para a execução acabar; Cycles e Instrs. retired nessas linhas incluem esses nops e o caminho errado que o laço percorre.
+### Todas as execuções do Ripes
+
+| Execução | Cycles | Instrs. retired | CPI | x13 |
+| --- | --- | --- | --- | --- |
+| RV32_5S, dados originais | 88 | 52 | 1,692 | 733 (correto) |
+| RV32_5S, dados ordenados | 88 | 52 | 1,692 | 733 (correto) |
+| RV32_5S_NO_FW, dados originais | 114 | 52 | 2,192 | 733 (correto) |
+| RV32_5S_NO_FW, dados ordenados | 114 | 52 | 2,192 | 733 (correto) |
+| RV32_5S_NO_HZ, dados originais | — | — | — | não terminou (o Ripes ficou rodando além de 15 s) |
+| RV32_5S_NO_HZ, dados originais, 4 nops antes do ecall | 90 | 62 | 1,452 | 313 (ERRADO) |
+| RV32_5S_NO_HZ, dados ordenados | — | — | — | não terminou (o Ripes ficou rodando além de 15 s) |
+| RV32_5S_NO_HZ, dados ordenados, 4 nops antes do ecall | 90 | 62 | 1,452 | 608 (ERRADO) |
+| RV32_5S_NO_FW_HZ, dados originais | — | — | — | não terminou (o Ripes ficou rodando além de 15 s) |
+| RV32_5S_NO_FW_HZ, dados originais, 4 nops antes do ecall | 86 | 66 | 1,303 | 426.576.476 (ERRADO) |
+| RV32_5S_NO_FW_HZ, dados ordenados | — | — | — | não terminou (o Ripes ficou rodando além de 15 s) |
+| RV32_5S_NO_FW_HZ, dados ordenados, 4 nops antes do ecall | 86 | 66 | 1,303 | 426.576.476 (ERRADO) |
+
+Sem hazard detection o `ecall` não é segurado e lê o `a7` do banco de registradores antes de o `addi x17, x0, 10` anterior chegar ao WB; por isso o `laco.s` original não termina nesses processadores ("não terminou" = o Ripes passou de 15 s). Medido: com 0, 1 ou 2 `nop` entre o `li a7, 10` e o `ecall` ainda não termina; com 3 ou mais termina (usamos 4 por margem, em `laco_sem_hz.s`). Cycles e Instrs. retired dessas linhas incluem os nops e o caminho errado que o laço percorre. Os processadores sem hazard detection executam o laço com valores velhos dos registradores (dependências RAW não resolvidas), por isso o x13 sai errado.
+
+A tabela de pipeline exportada pelo Ripes para o processador sem forwarding vem truncada em 100 ciclos (a execução tem 114); Cycles, Instrs. retired e registradores estão completos.
 
 ### Prints do pipeline (gerados a partir do relatório do Ripes, processador RV32_5S)
 
@@ -224,12 +245,12 @@ Arquivos em `resultados/ripes/prints/`. Legendas:
 
 ```
 (a) Pipeline enchendo - RV32 5-stage, laco.s
-Os 5 estagios ficam ocupados pela primeira vez no ciclo 4. Antes disso o pipeline esta enchendo.
+Os 5 estágios ficam ocupados pela primeira vez no ciclo 4. Antes disso o pipeline está enchendo.
 
 (b) Bolha por load-use - lw x5 seguido de blt x5
-O blt precisa de x5, que o lw so entrega depois de MEM. No ciclo 9 o blt fica parado em ID (e o add em IF): entra uma bolha (nop) em EX e o blt so executa um ciclo depois, ja com x5 via forwarding.
+O blt precisa de x5, que o lw só entrega depois de MEM. No ciclo 9 o blt fica parado em ID (e o add em IF): entra uma bolha (nop) em EX e o blt só executa um ciclo depois, já com x5 via forwarding.
 
 (c) Flush no desvio tomado - blt x12, x11, laco
-O blt e decidido em EX (ciclo 14). As 2 instrucoes que ja tinham entrado no pipeline atras dele (addi x17 x0 10; ecall) sao descartadas (cinza com borda vermelha) e nunca chegam a EX. O PC volta para laco.
+O blt é decidido em EX (ciclo 14). As 2 instruções que já tinham entrado no pipeline atrás dele (addi x17 x0 10; ecall) são descartadas (cinza com borda vermelha) e nunca chegam a EX. O PC volta para laco.
 ```
 

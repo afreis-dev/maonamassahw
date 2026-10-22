@@ -13,6 +13,8 @@ SOMA_ESPERADA_RIPES = 733
 
 
 def br(valor, casas=3):
+    if valor is None:
+        return "n/d"
     texto = f"{valor:,.{casas}f}"
     return texto.replace(",", "#").replace(".", ",").replace("#", ".")
 
@@ -142,6 +144,12 @@ def carregar():
         ("branch250", "parte5_branch250_causa.txt"),
     ):
         d["causa"][rotulo] = parse_causa(ler(arquivo))
+        hw, _ = d["causa"][rotulo]
+        if mediana_hw(hw["aleatorio"], "misses") is None or mediana_hw(hw["sort"], "misses") is None:
+            raise SystemExit(
+                f"sem contadores de hardware em resultados/{arquivo}: "
+                "rode scripts/parte3.sh em uma máquina onde o perf (ou scripts/contadores.c) consiga ler branches e branch-misses"
+            )
     return d
 
 
@@ -153,13 +161,15 @@ def secao_ambiente(f):
     gcc = re.search(r"^gcc: (.+)$", ambiente, re.M)
     vg = re.search(r"^valgrind: (.+)$", ambiente, re.M)
     freq = frequencia_cperf()
+    nominal = re.search(r"@\s*([\d.]+)\s*GHz", cpu.group(1)) if cpu else None
+    nominal_br = br(float(nominal.group(1)), 2) if nominal else "?"
     linhas = [
         ["CPU (modelo)", cpu.group(1).strip() if cpu else "?"],
-        ["Frequência (GHz)", f"2,90 nominal (lscpu); {br(freq, 2)} efetiva sob carga (cperf)" if freq else "2,90 nominal (lscpu)"],
+        ["Frequência (GHz)", f"{nominal_br} nominal (lscpu); {br(freq, 2)} efetiva sob carga (cperf)" if freq else f"{nominal_br} nominal (lscpu)"],
         ["Sistema operacional", f"{so.group(1) if so else '?'} em WSL2 (kernel {kernel.group(1).split()[1] if kernel else '?'}), host Windows 11"],
         ["Compilador e versão", gcc.group(1) if gcc else "?"],
         ["Ferramenta de medição", f"contadores de hardware via perf_event_open (scripts/contadores.c, mesmos eventos do perf stat) e {vg.group(1) if vg else 'Valgrind'} (cachegrind --branch-sim)"],
-        ["Nº de repetições", REP],
+        ["Nº de repetições", inteiro(REP)],
     ]
     f.write("## Ambiente\n\n" + tabela(["Item", "Valor"], linhas) + "\n\n")
 
@@ -207,8 +217,15 @@ def secao_tabela1(f, d):
         linhas.append(["custo_por_erro (ciclos), frequência efetiva", f"{br(tempo_extra * freq * 1e9 / extras, 1)} ciclos"])
     linhas.append(["custo_por_erro (ciclos), frequência nominal 2,90 GHz", f"{br(tempo_extra * 2.9e9 / extras, 1)} ciclos"])
     f.write(tabela(["Passo", "Valor"], linhas) + "\n\n")
+    calibrada = re.search(r"Use ([\d.]+) GHz como refer", ler("00_frequencia_cperf.txt"))
+    if freq and calibrada:
+        ref = float(calibrada.group(1))
+        f.write(
+            f"Observação: o `cperf calib` indica {br(ref, 3)} GHz como referência (uma única medição); com esse valor o custo seria "
+            f"{br(tempo_extra * ref * 1e9 / extras, 1)} ciclos. Usamos a mediana das 3 medições de `cperf freq` ({br(freq, 3)} GHz).\n\n"
+        )
     if freq:
-        f.write(f"Ciclos por iteração do laço: aleatório {br(ta * freq * 1e9 / ITERACOES, 2)}, ordenado {br(to * freq * 1e9 / ITERACOES, 2)} (a 4,0 GHz efetivos).\n\n")
+        f.write(f"Ciclos por iteração do laço: aleatório {br(ta * freq * 1e9 / ITERACOES, 2)}, ordenado {br(to * freq * 1e9 / ITERACOES, 2)} (a {br(freq, 1)} GHz efetivos).\n\n")
 
     f.write("### Valgrind (cachegrind --branch-sim=yes), simulador de preditor\n\n")
     linhas = []
@@ -292,7 +309,12 @@ def secao_tabela3(f, d):
         o = por_limiar[limiar].get("sort")
         linhas.append([limiar, br(float(a["mediana_s"]), 3) if a else "", br(float(o["mediana_s"]), 3) if o else "", f"{(256 - limiar) / 256:.1%}".replace(".", ",")])
     f.write("### 5.4 — curva do limiar (mediana de 5 execuções)\n\n")
-    f.write(tabela(["LIMIAR", "aleatório (s)", "ordenado (s)", "P(if verdadeiro)"], linhas) + "\n\n")
+    f.write(tabela(["LIMIAR", "aleatório (s)", "ordenado (s)", "P(if verdadeiro) teórica"], linhas) + "\n\n")
+    f.write(
+        "A curva vem do `scripts/parte5.sh` (5 execuções por ponto, medidas à parte), por isso os pontos de LIMIAR 128 e 250 diferem um pouco das Tabelas 1 e 3, "
+        "que vêm do `medir.sh`. A coluna de probabilidade é a teórica, (256 − LIMIAR) / 256, com valores uniformes de 0 a 255; no array sorteado "
+        "a fração real de `v[i] >= LIMIAR` difere em até ~0,1 ponto percentual.\n\n"
+    )
     f.write("Gráfico: `resultados/parte5_grafico_limiar.png`\n\n")
 
 
@@ -303,28 +325,31 @@ def ler_ripes(nome):
     return json.loads(caminho.read_text(encoding="utf-8"))
 
 
+def x13_texto(j):
+    x13 = j["registers"]["x13"]
+    return f"{inteiro(x13)} ({'correto' if x13 == SOMA_ESPERADA_RIPES else 'ERRADO'})"
+
+
+def linha_ripes(rotulo, nome):
+    j = ler_ripes(nome)
+    if j is None:
+        if (RES / "ripes" / f"{nome}.nao_termina.txt").exists():
+            return [rotulo, "—", "—", "—", "não terminou (o Ripes ficou rodando além de 15 s)"]
+        return [rotulo, "—", "—", "—", "sem dados"]
+    return [rotulo, j["cycles"], j["# instructions retired"], br(j["CPI"], 3), x13_texto(j)]
+
+
 def secao_ripes(f):
     f.write("## Parte 6 — Ripes\n\n")
     f.write(f"Soma esperada (calculada à mão): 200 + 150 + 255 + 128 = **{SOMA_ESPERADA_RIPES}**\n\n")
-    linhas = []
-    for nome, rotulo in (
-        ("5s_aleatorio", "5-stage processor"),
-        ("5s_sem_fw_aleatorio", "5-stage processor w/o forwarding unit"),
-        ("5s_sem_fw_hz_aleatorio", "5-stage w/o forwarding or hazard detection (laco.s original)"),
-        ("5s_sem_fw_hz_aleatorio_com_nops", "5-stage w/o forwarding or hazard detection (laco_sem_hz.s: 4 nops antes do ecall)"),
-        ("5s_ordenado", "5-stage processor — dados ordenados"),
-        ("5s_sem_hz_aleatorio", "extra: 5-stage w/o hazard detection (laco.s original)"),
-        ("5s_sem_hz_aleatorio_com_nops", "extra: 5-stage w/o hazard detection (laco_sem_hz.s)"),
-        ("5s_sem_fw_ordenado", "extra: 5-stage w/o forwarding unit — dados ordenados"),
-        ("5s_sem_fw_hz_ordenado_com_nops", "extra: 5-stage w/o fw/hazard — dados ordenados (laco_sem_hz_ordenado.s)"),
-    ):
-        j = ler_ripes(nome)
-        if j is None:
-            marcador = (RES / "ripes" / f"{nome}.nao_termina.txt").exists()
-            linhas.append([rotulo, "—", "—", "—", "NÃO TERMINA: o `li a7, 10` é seguido direto do `ecall`, que lê o a7 antigo; sem hazard detection a execução não acaba" if marcador else "sem dados"])
-            continue
-        x13 = j["registers"]["x13"]
-        linhas.append([rotulo, j["cycles"], j["# instructions retired"], br(j["CPI"], 3), f"{x13} ({'correto' if x13 == SOMA_ESPERADA_RIPES else 'ERRADO'})"])
+    f.write("### Tabela do relatório\n\n")
+    linhas = [
+        linha_ripes("5-stage processor", "5s_aleatorio"),
+        linha_ripes("5-stage processor w/o forwarding unit", "5s_sem_fw_aleatorio"),
+        linha_ripes("5-stage processor w/o forwarding or hazard detection (laco.s original)", "5s_sem_fw_hz_aleatorio"),
+        linha_ripes("5-stage processor w/o forwarding or hazard detection (laco_sem_hz.s, 4 nops antes do ecall)", "5s_sem_fw_hz_aleatorio_com_nops"),
+        linha_ripes("5-stage processor - dados ordenados", "5s_ordenado"),
+    ]
     f.write(tabela(["Processador", "Cycles", "Instrs. retired", "CPI", "x13"], linhas) + "\n\n")
     base = ler_ripes("5s_aleatorio")
     semfw = ler_ripes("5s_sem_fw_aleatorio")
@@ -334,12 +359,36 @@ def secao_ripes(f):
     if base and ordenado:
         f.write(f"Dados ordenados no processador completo: {ordenado['cycles']} ciclos contra {base['cycles']} com os dados originais. ")
         f.write("A ordem dos dados não muda nada: o número de desvios tomados é o mesmo (4 do `blt x5` + 7 do `blt x12`), então o Ripes usa previsão estática (sempre \"não desvia\"), sem histórico.\n\n")
-    f.write("Os processadores sem hazard detection executam o programa com valores velhos dos registradores (dependências RAW não resolvidas), por isso o x13 sai errado quando o programa chega a terminar. As linhas com `laco_sem_hz*.s` usam o mesmo laço, só com 4 `nop` antes do `ecall` para a execução acabar; Cycles e Instrs. retired nessas linhas incluem esses nops e o caminho errado que o laço percorre.\n\n")
+
+    f.write("### Todas as execuções do Ripes\n\n")
+    linhas = []
+    for nome, processador, com_nops in (
+        ("5s", "RV32_5S", False),
+        ("5s_sem_fw", "RV32_5S_NO_FW", False),
+        ("5s_sem_hz", "RV32_5S_NO_HZ", True),
+        ("5s_sem_fw_hz", "RV32_5S_NO_FW_HZ", True),
+    ):
+        for dados, rotulo_dados in (("aleatorio", "originais"), ("ordenado", "ordenados")):
+            linhas.append(linha_ripes(f"{processador}, dados {rotulo_dados}", f"{nome}_{dados}"))
+            if com_nops:
+                linhas.append(linha_ripes(f"{processador}, dados {rotulo_dados}, 4 nops antes do ecall", f"{nome}_{dados}_com_nops"))
+    f.write(tabela(["Execução", "Cycles", "Instrs. retired", "CPI", "x13"], linhas) + "\n\n")
+
+    f.write(
+        "Sem hazard detection o `ecall` não é segurado e lê o `a7` do banco de registradores antes de o `addi x17, x0, 10` anterior chegar ao WB; "
+        "por isso o `laco.s` original não termina nesses processadores (\"não terminou\" = o Ripes passou de 15 s). "
+        "Medido: com 0, 1 ou 2 `nop` entre o `li a7, 10` e o `ecall` ainda não termina; com 3 ou mais termina (usamos 4 por margem, em `laco_sem_hz.s`). "
+        "Cycles e Instrs. retired dessas linhas incluem os nops e o caminho errado que o laço percorre. "
+        "Os processadores sem hazard detection executam o laço com valores velhos dos registradores (dependências RAW não resolvidas), por isso o x13 sai errado.\n\n"
+    )
+    f.write(
+        "A tabela de pipeline exportada pelo Ripes para o processador sem forwarding vem truncada em 100 ciclos (a execução tem 114); "
+        "Cycles, Instrs. retired e registradores estão completos.\n\n"
+    )
     legendas = RES / "ripes" / "prints" / "legendas.txt"
     if legendas.exists():
         f.write("### Prints do pipeline (gerados a partir do relatório do Ripes, processador RV32_5S)\n\n")
         f.write("Arquivos em `resultados/ripes/prints/`. Legendas:\n\n```\n" + legendas.read_text(encoding="utf-8-sig").strip() + "\n```\n\n")
-
 
 def main():
     d = carregar()
