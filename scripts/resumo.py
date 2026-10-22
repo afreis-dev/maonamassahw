@@ -313,7 +313,7 @@ def secao_tabela3(f, d):
     f.write(
         "A curva vem do `scripts/parte5.sh` (5 execuções por ponto, medidas à parte), por isso os pontos de LIMIAR 128 e 250 diferem um pouco das Tabelas 1 e 3, "
         "que vêm do `medir.sh`. A coluna de probabilidade é a teórica, (256 − LIMIAR) / 256, com valores uniformes de 0 a 255; no array sorteado "
-        "a fração real de `v[i] >= LIMIAR` difere em até ~0,1 ponto percentual.\n\n"
+        "a fração real de `v[i] >= LIMIAR` difere em até ~0,25 ponto percentual (50,2% em vez de 50,0% no LIMIAR 128).\n\n"
     )
     f.write("Gráfico: `resultados/parte5_grafico_limiar.png`\n\n")
 
@@ -376,8 +376,8 @@ def secao_ripes(f):
 
     f.write(
         "Sem hazard detection o `ecall` não é segurado e lê o `a7` do banco de registradores antes de o `addi x17, x0, 10` anterior chegar ao WB; "
-        "por isso o `laco.s` original não termina nesses processadores (\"não terminou\" = o Ripes passou de 15 s). "
-        "Medido: com 0, 1 ou 2 `nop` entre o `li a7, 10` e o `ecall` ainda não termina; com 3 ou mais termina (usamos 4 por margem, em `laco_sem_hz.s`). "
+        "por isso o `laco.s` original não terminou nesses processadores (\"não terminou\" = o Ripes passou de 15 s). "
+        "Com 4 `nop` entre o `li a7, 10` e o `ecall` (`laco_sem_hz.s`) o programa termina. "
         "Cycles e Instrs. retired dessas linhas incluem os nops e o caminho errado que o laço percorre. "
         "Os processadores sem hazard detection executam o laço com valores velhos dos registradores (dependências RAW não resolvidas), por isso o x13 sai errado.\n\n"
     )

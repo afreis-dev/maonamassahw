@@ -15,7 +15,7 @@ Infraestrutura de Hardware — CESAR School
 | `branchless.c` | Versão sem desvio: o `if` vira máscara aritmética (Parte 4) |
 | `ripes/laco.s` | Laço em Assembly RISC-V completo (Parte 6) |
 | `ripes/laco_ordenado.s` | Mesmo laço com os dados ordenados (Passo 6.7.3) |
-| `ripes/laco_sem_hz*.s` | Mesmo laço com 4 `nop` antes do `ecall`: sem hazard detection o `ecall` lê o `a7` antigo e o programa original não termina (são necessários pelo menos 3 `nop`) |
+| `ripes/laco_sem_hz*.s` | Mesmo laço com 4 `nop` antes do `ecall`: sem hazard detection o `ecall` lê o `a7` antigo e o programa original não termina |
 | `scripts/` | Scripts que geram as medições (a frequência real vem do `cperf` do laboratório anterior, ver abaixo) |
 | `resultados/` | Saídas brutas, Assembly gerado, gráfico e diagramas do pipeline |
 | `resultados/DADOS_PARA_RELATORIO.md` | Tabelas 1 a 3, contas e dados do Ripes prontos para o relatório |

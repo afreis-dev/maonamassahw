@@ -196,7 +196,7 @@ Razão aleatório / ordenado: LIMIAR 128 = 8,75 ×; LIMIAR 250 = 1,80 ×.
 | 250 | 0,186 | 0,098 | 2,3% |
 | 256 | 0,087 | 0,088 | 0,0% |
 
-A curva vem do `scripts/parte5.sh` (5 execuções por ponto, medidas à parte), por isso os pontos de LIMIAR 128 e 250 diferem um pouco das Tabelas 1 e 3, que vêm do `medir.sh`. A coluna de probabilidade é a teórica, (256 − LIMIAR) / 256, com valores uniformes de 0 a 255; no array sorteado a fração real de `v[i] >= LIMIAR` difere em até ~0,1 ponto percentual.
+A curva vem do `scripts/parte5.sh` (5 execuções por ponto, medidas à parte), por isso os pontos de LIMIAR 128 e 250 diferem um pouco das Tabelas 1 e 3, que vêm do `medir.sh`. A coluna de probabilidade é a teórica, (256 − LIMIAR) / 256, com valores uniformes de 0 a 255; no array sorteado a fração real de `v[i] >= LIMIAR` difere em até ~0,25 ponto percentual (50,2% em vez de 50,0% no LIMIAR 128).
 
 Gráfico: `resultados/parte5_grafico_limiar.png`
 
@@ -235,7 +235,7 @@ Dados ordenados no processador completo: 88 ciclos contra 88 com os dados origin
 | RV32_5S_NO_FW_HZ, dados ordenados | — | — | — | não terminou (o Ripes ficou rodando além de 15 s) |
 | RV32_5S_NO_FW_HZ, dados ordenados, 4 nops antes do ecall | 86 | 66 | 1,303 | 426.576.476 (ERRADO) |
 
-Sem hazard detection o `ecall` não é segurado e lê o `a7` do banco de registradores antes de o `addi x17, x0, 10` anterior chegar ao WB; por isso o `laco.s` original não termina nesses processadores ("não terminou" = o Ripes passou de 15 s). Medido: com 0, 1 ou 2 `nop` entre o `li a7, 10` e o `ecall` ainda não termina; com 3 ou mais termina (usamos 4 por margem, em `laco_sem_hz.s`). Cycles e Instrs. retired dessas linhas incluem os nops e o caminho errado que o laço percorre. Os processadores sem hazard detection executam o laço com valores velhos dos registradores (dependências RAW não resolvidas), por isso o x13 sai errado.
+Sem hazard detection o `ecall` não é segurado e lê o `a7` do banco de registradores antes de o `addi x17, x0, 10` anterior chegar ao WB; por isso o `laco.s` original não terminou nesses processadores ("não terminou" = o Ripes passou de 15 s). Com 4 `nop` entre o `li a7, 10` e o `ecall` (`laco_sem_hz.s`) o programa termina. Cycles e Instrs. retired dessas linhas incluem os nops e o caminho errado que o laço percorre. Os processadores sem hazard detection executam o laço com valores velhos dos registradores (dependências RAW não resolvidas), por isso o x13 sai errado.
 
 A tabela de pipeline exportada pelo Ripes para o processador sem forwarding vem truncada em 100 ciclos (a execução tem 114); Cycles, Instrs. retired e registradores estão completos.
 
